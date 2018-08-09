@@ -1,20 +1,28 @@
 import time
-import wiringpi as pi
+import pigpio
 
-motor_pin = 15
+pin_sb = 22
+in1 = 27
+in2 = 17
 
-pi.wiringPiSetupGpio()
-pi.pinMode( motor_pin, pi.OUTPUT )
+tf = True
 
-pi.softPwmCreate( motor_pin, 0, 100)
-pi.softPwmWrite( motor_pin, 0 )
+pi = pigpio.pi()
 
-while True:
-    speed = 0
-    while ( speed <= 100 ):
-        pi.softPwmWrite( motor_pin, speed )
-        time.sleep(0.3)
-        speed = speed + 1
+pi.set_mode(pin_sb, pigpio.OUTPUT)
+pi.set_mode(in1, pigpio.OUTPUT)
+pi.set_mode(in2, pigpio.OUTPUT)
 
-    pi.softPwmWrite( motor_pin, 0 )
-    time.sleep(2)
+pi.set_PWM_frequency(pin_sb, 800)
+pi.set_PWM_range(pin_sb, 255)
+
+pi.write(in1, 1)
+pi.write(in2, 0)
+try:
+
+	while True:
+		pi.set_PWM_dutycycle(pin_sb, 255)
+except KeyboardInterrupt:
+	pi.set_PWM_dutycycle(pin_sb, 0)
+	pi.write(in1, 1)
+	pi.write(in2, 0)
